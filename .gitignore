@@ -1,0 +1,16 @@
+# Ignorar el directorio que contiene las claves
+/claves/
+
+# Ignorar archivos de Python específicos
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar archivos de IDEs (opcional pero recomendado)
+.vscode/
+.idea/
+.spyder-py3/
+
+# Ignorar archivos temporales
+*.cifrado
