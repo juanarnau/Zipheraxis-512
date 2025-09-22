@@ -7,10 +7,45 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Ignorar archivos de IDEs (opcional pero recomendado)
+# Ignorar archivos de IDEs
 .vscode/
 .idea/
 .spyder-py3/
 
 # Ignorar archivos temporales
 *.cifrado
+
+# Entornos virtuales
+venv/
+env/
+ENV/
+.vscode/
+
+# Archivos de configuración local
+*.log
+*.sqlite3
+*.db
+*.bak
+
+# Archivos de compilación
+*.exe
+*.spec
+build/
+dist/
+*.egg-info/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Claves o configuraciones sensibles
+*.key
+*.pem
+*.enc
+
+# Ignorar archivos .txt temporales o de prueba
+*.txt
+*.iss
+
+# Incluir requirements.txt explícitamente
+!requirements.txt
