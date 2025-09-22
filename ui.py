@@ -5,6 +5,7 @@ from PIL import Image, ImageTk
 import core
 import keys
 import os
+import sys
 
 # Configuración del tema y el color
 ctk.set_appearance_mode("Dark")
@@ -12,6 +13,15 @@ ctk.set_default_color_theme("blue")
 
 class App(ctk.CTk):
     def __init__(self):
+        # Corrección para el icono de la barra de tareas en Windows
+        if sys.platform.startswith("win"):
+            import ctypes
+            try:
+                # El ID de la aplicación debe ser único
+                myappid = "mycompany.myproduct.subproduct.version"
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+            except AttributeError:
+                pass
         super().__init__()
         self.title("Zipheraxis")
         self.geometry("800x650")
@@ -19,7 +29,7 @@ class App(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.password = None
         self.vault_data = None
-        
+
         # Intentar cargar las imágenes de inicio
         try:
             self.iconbitmap(os.path.join("assets", "icon.ico"))
@@ -43,7 +53,16 @@ class App(ctk.CTk):
             self.logo_label.pack(pady=(100, 5))
         except FileNotFoundError:
             pass # Si no hay logo, no se muestra
-            
+         # Intenta cargar el icono para la ventana y la barra de tareas
+        try:
+            icon_image_path = os.path.join("assets", "icon.png")
+            if os.path.exists(icon_image_path):
+                icon_image = Image.open(icon_image_path)
+                icon_photo = ImageTk.PhotoImage(icon_image)
+                self.wm_iconphoto(True, icon_photo)
+        except Exception as e:
+            # Manejar errores si el archivo no se encuentra o el formato es incorrecto
+            print(f"Error al cargar el icono: {e}")
         ctk.CTkLabel(self.login_frame, text="Zipheraxis", font=ctk.CTkFont(size=24, weight="bold")).pack(pady=(5, 10))
         
         self.password_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Contraseña Maestra", show="*", width=250)
