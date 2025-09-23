@@ -7,21 +7,27 @@ import keys
 import os
 import sys
 
-# Configuración del tema y el color
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 class App(ctk.CTk):
     def __init__(self):
-        # Corrección para el icono de la barra de tareas en Windows
         if sys.platform.startswith("win"):
             import ctypes
             try:
-                # El ID de la aplicación debe ser único
                 myappid = "mycompany.myproduct.subproduct.version"
                 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
             except AttributeError:
                 pass
+
         super().__init__()
         self.title("Zipheraxis")
         self.geometry("800x650")
@@ -29,40 +35,36 @@ class App(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
         self.password = None
         self.vault_data = None
-
-        # Intentar cargar las imágenes de inicio
-        try:
-            self.iconbitmap(os.path.join("assets", "icon.ico"))
-        except tk.TclError:
-            try:
-                icon_image = Image.open(os.path.join("assets", "icon.png"))
-                icon_photo = ImageTk.PhotoImage(icon_image)
-                self.iconphoto(False, icon_photo)
-            except Exception:
-                pass
+        self.icon_photo = None
         
-        # Configurar la pantalla de inicio de sesión
+        try:
+            icon_image_path = resource_path(os.path.join("assets", "icon.ico"))
+            if os.path.exists(icon_image_path):
+                icon_image = Image.open(icon_image_path)
+                self.icon_photo = ImageTk.PhotoImage(icon_image)
+                self.wm_iconphoto(True, self.icon_photo)
+            self.iconbitmap(icon_image_path)
+        except Exception as e:
+            print(f"Error al cargar el icono: {e}")
+            
         self.login_frame = ctk.CTkFrame(self, corner_radius=10)
         self.login_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
         self.login_frame.grid_columnconfigure(0, weight=1)
         
         try:
-            logo_path = os.path.join("assets", "logo.png")
-            self.logo_image = ctk.CTkImage(Image.open(logo_path), size=(100, 100))
-            self.logo_label = ctk.CTkLabel(self.login_frame, image=self.logo_image, text="")
-            self.logo_label.pack(pady=(100, 5))
+            logo_path = resource_path(os.path.join("assets", "logo.png"))
+            if os.path.exists(logo_path):
+                self.logo_image = ctk.CTkImage(Image.open(logo_path), size=(100, 100))
+                self.logo_label = ctk.CTkLabel(self.login_frame, image=self.logo_image, text="")
+                self.logo_label.pack(pady=(100, 5))
+            else:
+                raise FileNotFoundError
         except FileNotFoundError:
-            pass # Si no hay logo, no se muestra
-         # Intenta cargar el icono para la ventana y la barra de tareas
-        try:
-            icon_image_path = os.path.join("assets", "icon.png")
-            if os.path.exists(icon_image_path):
-                icon_image = Image.open(icon_image_path)
-                icon_photo = ImageTk.PhotoImage(icon_image)
-                self.wm_iconphoto(True, icon_photo)
+            self.logo_label = ctk.CTkLabel(self.login_frame, text="")
+            self.logo_label.pack(pady=(100, 5))
         except Exception as e:
-            # Manejar errores si el archivo no se encuentra o el formato es incorrecto
-            print(f"Error al cargar el icono: {e}")
+            messagebox.showwarning("Advertencia", f"Error al cargar el logo: {e}", parent=self)
+            
         ctk.CTkLabel(self.login_frame, text="Zipheraxis", font=ctk.CTkFont(size=24, weight="bold")).pack(pady=(5, 10))
         
         self.password_entry = ctk.CTkEntry(self.login_frame, placeholder_text="Contraseña Maestra", show="*", width=250)
@@ -78,7 +80,7 @@ class App(ctk.CTk):
     def autenticar(self, event=None):
         password = self.password_entry.get()
         if not password:
-            messagebox.showerror("Error", "Debes ingresar una contraseña.")
+            messagebox.showerror("Error", "Debes ingresar una contraseña.", parent=self)
             return
 
         self.vault_data, error = keys.cargar_vault(password)
@@ -87,38 +89,49 @@ class App(ctk.CTk):
             self.login_frame.destroy()
             self.main_app()
         else:
-            messagebox.showerror("Error", error)
+            messagebox.showerror("Error", error, parent=self)
 
     def crear_vault(self):
-        password = simpledialog.askstring("Crear Vault", "Ingresa una nueva contraseña maestra:", show="*")
+        temp_root = tk.Toplevel(self)
+        temp_root.withdraw()
+        if self.icon_photo:
+            temp_root.iconphoto(True, self.icon_photo)
+
+        password = simpledialog.askstring("Crear Vault", "Ingresa una nueva contraseña maestra:", show="*", parent=temp_root)
+
+        temp_root.destroy()
+        
         if not password:
-            messagebox.showerror("Error", "La contraseña no puede estar vacía.")
+            messagebox.showerror("Error", "La contraseña no puede estar vacía.", parent=self)
             return
         
         if os.path.exists(keys.VAULT_FILE):
-            messagebox.showerror("Error", "Ya existe un vault de claves. Bórralo para crear uno nuevo.")
+            messagebox.showerror("Error", "Ya existe un vault de claves. Bórralo para crear uno nuevo.", parent=self)
             return
             
         if keys.crear_vault(password):
-            messagebox.showinfo("Éxito", "Vault creado correctamente. Por favor, inicia sesión.")
+            messagebox.showinfo("Éxito", "Vault creado correctamente. Por favor, inicia sesión.", parent=self)
         else:
-            messagebox.showerror("Error", "No se pudo crear el vault.")
+            messagebox.showerror("Error", "No se pudo crear el vault.", parent=self)
 
     def main_app(self):
-        # --- Configuración de la ventana principal ---
         self.main_frame = ctk.CTkFrame(self, corner_radius=10)
         self.main_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
         self.main_frame.grid_columnconfigure(0, weight=1)
 
         try:
-            logo_path = os.path.join("assets", "logo.png")
-            self.logo_image = ctk.CTkImage(Image.open(logo_path), size=(100, 100))
-            self.logo_label = ctk.CTkLabel(self.main_frame, image=self.logo_image, text="")
-            self.logo_label.pack(pady=(10, 5))
+            logo_path = resource_path(os.path.join("assets", "logo.png"))
+            if os.path.exists(logo_path):
+                self.logo_image = ctk.CTkImage(Image.open(logo_path), size=(100, 100))
+                self.logo_label = ctk.CTkLabel(self.main_frame, image=self.logo_image, text="")
+                self.logo_label.pack(pady=(10, 5))
+            else:
+                raise FileNotFoundError
         except FileNotFoundError:
-            pass
+            self.logo_label = ctk.CTkLabel(self.main_frame, text="")
+            self.logo_label.pack(pady=(10, 5))
         except Exception as e:
-            messagebox.showwarning("Advertencia", f"Error al cargar el logo: {e}")
+            messagebox.showwarning("Advertencia", f"Error al cargar el logo: {e}", parent=self)
 
         self.title_label = ctk.CTkLabel(self.main_frame, text="Zipheraxis", font=ctk.CTkFont(size=24, weight="bold"))
         self.title_label.pack(pady=(5, 10))
@@ -188,7 +201,7 @@ class App(ctk.CTk):
         for clave in datos_privadas:
             ctk.CTkLabel(self.claves_frame, text=clave["nombre"]).grid(row=row_index, column=0, padx=10, pady=5, sticky="w")
             ctk.CTkLabel(self.claves_frame, text="Privada").grid(row=row_index, column=1, padx=10, pady=5, sticky="w")
-            ctk.CTkLabel(self.claves_frame, text=clave["caducidad"]).grid(row=row_index, column=2, padx=10, pady=5, sticky="w")
+            ctk.CTkLabel(self.claves_frame, text="Caducidad").grid(row=row_index, column=2, padx=10, pady=5, sticky="w")
             btn_eliminar = ctk.CTkButton(self.claves_frame, text="Eliminar", command=lambda r=clave["nombre"]: self.manejar_eliminar_clave(r), width=80, fg_color="red")
             btn_eliminar.grid(row=row_index, column=3, padx=10, pady=5)
             row_index += 1
@@ -210,33 +223,33 @@ class App(ctk.CTk):
             self.combo_privada.set("No hay claves")
 
     def manejar_generar_claves(self):
-        nombre_usuario = simpledialog.askstring("Nombre de Usuario", "Ingresa tu nombre para el certificado:")
+        nombre_usuario = simpledialog.askstring("Nombre de Usuario", "Ingresa tu nombre para el certificado:", parent=self)
         if not nombre_usuario:
             return
 
         exito, mensaje = keys.agregar_clave_a_vault(nombre_usuario, self.password)
         if exito:
-            messagebox.showinfo("Claves Generadas", f"Se ha generado un nuevo par de claves para {nombre_usuario}.")
-            self.vault_data, _ = keys.cargar_vault(self.password) # Volver a cargar el vault después de añadir claves
+            messagebox.showinfo("Claves Generadas", f"Se ha generado un nuevo par de claves para {nombre_usuario}.", parent=self)
+            self.vault_data, _ = keys.cargar_vault(self.password)
             self.actualizar_listas_de_claves()
             self.tabview.set("Operaciones de Cifrado")
         else:
-            messagebox.showerror("Error", mensaje)
+            messagebox.showerror("Error", mensaje, parent=self)
 
     def manejar_eliminar_clave(self, nombre_clave):
-        respuesta = messagebox.askyesno("Confirmar Eliminación", f"¿Estás seguro de que quieres eliminar la clave '{nombre_clave}'?")
+        respuesta = messagebox.askyesno("Confirmar Eliminación", f"¿Estás seguro de que quieres eliminar la clave '{nombre_clave}'?", parent=self)
         if respuesta:
             if keys.eliminar_clave_de_vault(nombre_clave, self.password):
-                messagebox.showinfo("Clave Eliminada", "La clave ha sido eliminada correctamente.")
-                self.vault_data, _ = keys.cargar_vault(self.password) # Volver a cargar el vault después de eliminar claves
+                messagebox.showinfo("Clave Eliminada", "La clave ha sido eliminada correctamente.", parent=self)
+                self.vault_data, _ = keys.cargar_vault(self.password)
                 self.actualizar_listas_de_claves()
             else:
-                messagebox.showerror("Error", "No se pudo eliminar la clave.")
+                messagebox.showerror("Error", "No se pudo eliminar la clave.", parent=self)
 
     def manejar_cifrar(self):
         nombre_seleccionado = self.combo_publica.get()
         if not nombre_seleccionado or nombre_seleccionado == "No hay certificados":
-            messagebox.showerror("Error", "Selecciona un certificado público para cifrar.")
+            messagebox.showerror("Error", "Selecciona un certificado público para cifrar.", parent=self)
             return
 
         ruta_archivo = filedialog.askopenfilename(title="Selecciona el archivo a cifrar")
@@ -245,27 +258,25 @@ class App(ctk.CTk):
 
         exito, mensaje = core.cifrar_archivo_desde_vault(ruta_archivo, nombre_seleccionado, self.password)
         if exito:
-            messagebox.showinfo("Éxito", mensaje)
+            messagebox.showinfo("Éxito", mensaje, parent=self)
         else:
-            messagebox.showerror("Error de Cifrado", mensaje)
+            messagebox.showerror("Error de Cifrado", mensaje, parent=self)
 
     def manejar_descifrar(self):
         nombre_seleccionado = self.combo_privada.get()
         if not nombre_seleccionado or nombre_seleccionado == "No hay claves":
-            messagebox.showerror("Error", "Selecciona una clave privada para descifrar.")
+            messagebox.showerror("Error", "Selecciona una clave privada para descifrar.", parent=self)
             return
             
         ruta_archivo = filedialog.askopenfilename(title="Selecciona el archivo a descifrar", filetypes=[("Archivos cifrados", "*.cifrado")])
         if not ruta_archivo:
             return
 
-        # La clave privada en el vault no tiene contraseña adicional
-        # Así que pasamos None
         exito, mensaje = core.descifrar_archivo_desde_vault(nombre_seleccionado, None, ruta_archivo, self.password)
         if exito:
-            messagebox.showinfo("Éxito", mensaje)
+            messagebox.showinfo("Éxito", mensaje, parent=self)
         else:
-            messagebox.showerror("Error de Descifrado", mensaje)
+            messagebox.showerror("Error de Descifrado", mensaje, parent=self)
             
     def salir_app(self):
         self.destroy()
