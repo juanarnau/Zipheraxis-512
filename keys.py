@@ -10,12 +10,11 @@ from cryptography.hazmat.backends import default_backend
 from datetime import datetime, timedelta
 
 # ----------------------------------------------------------------------
-# 🚨 LÓGICA DE PERSISTENCIA PARA EJECUTABLE (PYINSTALLER) 🚨
+# LÓGICA DE PERSISTENCIA PARA EJECUTABLE (PYINSTALLER)
 # Se asegura que el vault y el salt se guarden en una ubicación estable.
 # ----------------------------------------------------------------------
 # 1. Definir la carpeta de la aplicación en AppData/Roaming de Windows.
 APP_FOLDER_NAME = "Zipheraxis-512"
-# os.path.expanduser('~') obtiene la ruta al directorio del usuario (C:\Users\<Usuario>)
 APP_DATA_PATH = os.path.join(os.path.expanduser('~'), 'AppData', 'Roaming', APP_FOLDER_NAME)
 
 # 2. Asegurar que la carpeta exista antes de guardar archivos.
@@ -145,7 +144,7 @@ def generar_par_de_claves(nombre):
     # Este diccionario contiene la CLAVE PÚBLICA PEM
     datos_clave_publica = {
         "nombre": nombre,
-        # ✅ CAMBIO CLAVE: Usamos nombre de campo explícito
+        # CAMBIO CLAVE: Usamos nombre de campo explícito
         "clave_publica_pem_str": clave_publica_pem_str, 
         "expiration_date": fecha_caducidad_str 
     }
@@ -153,7 +152,7 @@ def generar_par_de_claves(nombre):
     # Este diccionario contiene la CLAVE PRIVADA PEM
     datos_clave_privada = {
         "nombre": nombre,
-        # ✅ CAMBIO CLAVE: Usamos nombre de campo explícito
+        # CAMBIO CLAVE: Usamos nombre de campo explícito
         "clave_privada_pem_str": clave_privada_pem_str, 
         "expiration_date": fecha_caducidad_str
     }
@@ -210,7 +209,7 @@ def importar_clave_a_vault(contrasena, nombre, ruta_archivo): # Se agregó 'cont
         datos_clave_publica_importada = {
             "nombre": nombre,
             "clave_publica_pem_str": clave_pem_str,
-            # ✅ CORRECTO: Usamos "N/A" para indicar que no hay fecha de caducidad conocida.
+            # CORRECTO: Usamos "N/A" para indicar que no hay fecha de caducidad conocida.
             "expiration_date": "N/A" 
         }
         

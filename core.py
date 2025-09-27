@@ -1,7 +1,7 @@
 import keys
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding # Renombrado para evitar conflictos
-from cryptography.hazmat.primitives import padding # Importacin correcta para PKCS7
+from cryptography.hazmat.primitives.asymmetric import padding as asymmetric_padding
+from cryptography.hazmat.primitives import padding 
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -114,7 +114,7 @@ def cifrar_archivo_con_vault(ruta_archivo, nombre_clave_destino, contrasena_vaul
     datos_clave = clave_completa.get('clave', clave_completa)
     
     if datos_clave.get('nombre') == nombre_clave_destino:
-      #  CORRECCIN CLAVE: Acceder al string PEM anidado 
+      #  CORRECCIÓN CLAVE: Acceder al string PEM anidado 
       clave_publica_pem_str = datos_clave.get('clave_publica_pem_str')
       break
       
@@ -136,7 +136,7 @@ def descifrar_archivo_con_vault(ruta_archivo, nombre_clave_privada, contrasena_v
     datos_clave = clave_completa.get('clave', clave_completa)
     
     if datos_clave.get('nombre') == nombre_clave_privada:
-      #  CORRECCIN CLAVE: Acceder al string PEM privado anidado
+      #  CORRECCIÓN CLAVE: Acceder al string PEM privado anidado
       clave_privada_pem_str = datos_clave.get('clave_privada_pem_str')
       break
       

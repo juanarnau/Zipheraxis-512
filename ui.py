@@ -3,7 +3,6 @@ from tkinter import filedialog, messagebox
 import customtkinter as ctk
 from PIL import Image
 import os
-# Estas libreras se asumen que existen en tu proyecto
 import keys
 import core
 
@@ -51,7 +50,7 @@ class AyudaWindow(ctk.CTkToplevel):
       "Paso 3: La otra persona cifra el archivo usando tu clave pblica.",
       "Paso 4: Cuando recibes el archivo cifrado y usas el nombre \"MiClaveSecreta\" para descifrar, tu programa encuentra la clave privada y descifra el archivo.",
       
-      # ADVERTENCIA AADIDA
+      # ADVERTENCIA AYUDA
       "---> : *****************************************************************\nINFORMACIN SOBRE CLAVES IMPORTADAS\nLas claves pblicas importadas de archivos externos (formato PEM) no contienen metadatos de caducidad.\nClaves generadas: Tienen la fecha de caducidad controlada por el Vault.\nClaves importadas: Muestran 'Caduca: N/A' porque esta informacin se pierde al exportarse al formato PEM estndar.\nSe recomienda contactar al remitente de la clave para confirmar su periodo de validez."
     ]
     
@@ -262,7 +261,6 @@ class App(ctk.CTk):
   def crear_ui_gestion_claves(self):
     # Entrada de contrasea (Oculta, solo existe para compatibilidad interna)
     self.entry_pass = ctk.CTkEntry(self.tabview.tab("Gestin de Claves"), show="*", width=1, height=1)
-    #self.entry_pass.grid(row=0, column=0, padx=0, pady=0, sticky="nw")
     
     # Lista de claves 
     self.lista_claves = ctk.CTkTextbox(self.tabview.tab("Gestin de Claves"))
@@ -530,7 +528,7 @@ class App(ctk.CTk):
         nombre = datos_clave.get('nombre', 'Nombre Desconocido')
         fecha_caducidad = datos_clave.get('expiration_date', 'N/A')
         
-        # AADIMOS EL NOMBRE PARA EL COMBOBOX 
+        # AñADIMOS EL NOMBRE PARA EL COMBOBOX 
         nombres_claves_publicas.append(nombre) 
         
         self.lista_claves.insert(tk.END, 
