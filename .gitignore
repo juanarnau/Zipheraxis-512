@@ -1,5 +1,7 @@
 # Ignorar el directorio que contiene las claves
 /claves/
+/convertir_icono.py
+/zipheraxis.spec
 
 # Ignorar archivos de Python específicos
 __pycache__/
