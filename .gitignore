@@ -35,6 +35,7 @@ ENV/
 build/
 dist/
 *.egg-info/
+*.bin
 
 # Archivos de sistema
 .DS_Store
